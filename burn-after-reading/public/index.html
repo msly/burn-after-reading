@@ -7,6 +7,28 @@
     <!-- 引入FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/styles.css">
+    <style>
+        /* 添加QR码容器样式 */
+        .qr-code {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        #qrcode-container {
+            min-height: 200px;
+            min-width: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #qrcode-container img {
+            max-width: 100%;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -294,7 +316,7 @@
     </template>
 
     <!-- QR Code库 -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.0/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <script src="/scripts.js"></script>
 </body>
 </html> 

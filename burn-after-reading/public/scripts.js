@@ -180,10 +180,61 @@ function renderDestroyedPage() {
 function generateQRCode(url) {
     const container = document.getElementById('qrcode-container');
     if (container) {
+        // 清空容器
         container.innerHTML = '';
-        QRCode.toCanvas(container, url, { width: 200 }, function (error) {
-            if (error) console.error('QR Code 生成失败:', error);
+        
+        try {
+            // 首先尝试使用toCanvas方法（原始方法）
+            QRCode.toCanvas(container, url, { 
+                width: 200,
+                margin: 1,
+                color: {
+                    dark: '#000',
+                    light: '#fff'
+                }
+            }, function (error) {
+                if (error) {
+                    console.error('QR Code 生成失败(canvas方法):', error);
+                    // 如果canvas方法失败，尝试toDataURL方法
+                    fallbackQRCode(container, url);
+                }
+            });
+        } catch (e) {
+            console.error('QR Code 生成出错:', e);
+            // 如果出现异常，使用备用方法
+            fallbackQRCode(container, url);
+        }
+    }
+}
+
+// 备用二维码生成方法
+function fallbackQRCode(container, url) {
+    try {
+        // 创建图片元素
+        const img = document.createElement('img');
+        
+        // 使用toDataURL方法生成二维码数据URL
+        QRCode.toDataURL(url, { 
+            width: 200,
+            margin: 1 
+        }, function (error, dataURL) {
+            if (error) {
+                console.error('QR Code 生成失败(dataURL方法):', error);
+                container.textContent = '二维码生成失败，请使用链接分享';
+                return;
+            }
+            
+            // 设置图片源为生成的二维码URL
+            img.src = dataURL;
+            img.alt = '访问二维码';
+            img.style.maxWidth = '100%';
+            
+            // 添加到容器
+            container.appendChild(img);
         });
+    } catch (e) {
+        console.error('备用QR码生成方法失败:', e);
+        container.textContent = '二维码生成失败，请使用链接分享';
     }
 }
 
