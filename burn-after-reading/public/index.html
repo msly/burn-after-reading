@@ -10,23 +10,33 @@
     <style>
         /* 添加QR码容器样式 */
         .qr-code {
-            display: flex;
-            justify-content: center;
+            width: 100%;
             margin: 20px 0;
             padding: 15px;
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
         #qrcode-container {
-            min-height: 200px;
-            min-width: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            display: inline-block;
+            position: relative;
         }
         #qrcode-container img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             max-width: 100%;
+        }
+        #qrcode-container canvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
     </style>
 </head>
