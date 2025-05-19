@@ -23,13 +23,14 @@ export interface CreateContentParams {
   password?: string;
   maxViews: number;
   expiryHours: number;
+  passwordHash?: string;
 }
 
 /**
  * 创建新内容
  */
 export function createContent(params: CreateContentParams): Content {
-  const { id, content, password = "", maxViews, expiryHours } = params;
+  const { id, content, passwordHash = "", maxViews, expiryHours } = params;
   
   const now = new Date();
   const expiresAt = new Date(now.getTime() + expiryHours * 60 * 60 * 1000);
@@ -37,7 +38,7 @@ export function createContent(params: CreateContentParams): Content {
   return {
     id,
     content,
-    passwordHash: hashPassword(password),
+    passwordHash,
     maxViews,
     viewCount: 0,
     createdAt: now,

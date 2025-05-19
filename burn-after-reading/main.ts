@@ -25,21 +25,40 @@ app.use(async (ctx, next) => {
     }
     
     // 尝试提供静态文件
-    const filePath = ctx.request.url.pathname;
+    const filePath = ctx.request.url.pathname === "/" 
+      ? "/index.html" 
+      : ctx.request.url.pathname;
+      
     await send(ctx, filePath, {
       root: `${Deno.cwd()}/public`,
-      index: "index.html",
     });
-  } catch {
+  } catch (error) {
     // 如果文件不存在，则返回index.html（用于SPA路由）
     if (ctx.response.status === 404) {
-      await send(ctx, "/", {
-        root: `${Deno.cwd()}/public`,
-        index: "index.html",
-      });
+      try {
+        await send(ctx, "/index.html", {
+          root: `${Deno.cwd()}/public`,
+        });
+      } catch (err) {
+        console.error("Error serving index.html:", err);
+        await next();
+      }
     } else {
+      console.error("Error serving static file:", error);
       await next();
     }
+  }
+});
+
+// 添加一个简单的根路由处理
+app.use(async (ctx) => {
+  // 如果所有中间件都未处理请求，则返回 404
+  if (!ctx.response.body) {
+    ctx.response.status = 404;
+    ctx.response.body = {
+      error: "Not Found",
+      message: "The requested resource was not found on this server."
+    };
   }
 });
 

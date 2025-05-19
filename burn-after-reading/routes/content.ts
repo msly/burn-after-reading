@@ -27,7 +27,7 @@ router.post("/api/content", async (ctx) => {
     }
     
     // 创建内容
-    const newContent = contentService.createContent(
+    const newContent = await contentService.createContent(
       content,
       password,
       Number(expiryHours),
@@ -98,7 +98,7 @@ router.post("/api/content/:id", async (ctx) => {
     const password = (body && body.password) ? body.password : "";
     
     // 查看内容
-    const content = contentService.viewContent(id, password);
+    const content = await contentService.viewContent(id, password);
     
     if (!content) {
       const info = contentService.getContentInfo(id);

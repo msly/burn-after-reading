@@ -10,7 +10,7 @@ import {
   isContentPasswordProtected,
   ContentInfo,
 } from "../models/content.ts";
-import { verifyPassword } from "../utils/crypto.ts";
+import { verifyPassword, hashPassword } from "../utils/crypto.ts";
 
 // 使用内存存储，在实际应用中可以替换为Deno KV
 const contentStore = new Map<string, Content>();
@@ -22,12 +22,12 @@ export class ContentService {
   /**
    * 创建新内容
    */
-  createContent(
+  async createContent(
     content: string,
     password: string,
     expiryHours: number,
     maxViews: number
-  ): Content {
+  ): Promise<Content> {
     const id = generateId();
     
     // 合法性检查
@@ -43,11 +43,14 @@ export class ContentService {
       throw new Error("查看次数必须大于0次");
     }
     
+    // 计算密码哈希
+    const passwordHash = await hashPassword(password);
+    
     // 创建内容
     const params: CreateContentParams = {
       id,
       content,
-      password,
+      passwordHash,
       maxViews,
       expiryHours
     };
@@ -93,7 +96,7 @@ export class ContentService {
   /**
    * 查看内容（需要验证密码）
    */
-  viewContent(id: string, password: string): Content | null {
+  async viewContent(id: string, password: string): Promise<Content | null> {
     const content = this.getContent(id);
     
     if (!content) {
@@ -101,7 +104,7 @@ export class ContentService {
     }
     
     // 验证密码
-    if (isContentPasswordProtected(content) && !verifyPassword(password, content.passwordHash)) {
+    if (isContentPasswordProtected(content) && !(await verifyPassword(password, content.passwordHash))) {
       return null;
     }
     
