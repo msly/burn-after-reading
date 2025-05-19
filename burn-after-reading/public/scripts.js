@@ -29,6 +29,7 @@ function handleRoute() {
     
     // 清空容器
     pageContainer.innerHTML = '';
+    state.currentView = null;
     
     if (hash === '#' || hash === '#home') {
         // 首页
@@ -230,6 +231,9 @@ async function handleCreateContent() {
         }
         
         const data = await response.json();
+        
+        // 清空页面容器，确保只显示一个页面
+        pageContainer.innerHTML = '';
         renderSuccessPage(data);
         
     } catch (error) {
@@ -259,6 +263,9 @@ async function fetchContentInfo(id) {
         }
         
         const data = await response.json();
+        
+        // 确保在渲染新页面前清空容器
+        pageContainer.innerHTML = '';
         
         if (data.isExpired) {
             renderExpiredPage();
@@ -335,6 +342,9 @@ async function fetchContent(id, password) {
         }
         
         const data = await response.json();
+        
+        // 清空页面容器，确保只显示一个页面
+        pageContainer.innerHTML = '';
         renderContentPage(data.content);
         
     } catch (error) {
