@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阅后即焚 - 安全分享敏感信息</title>
+    <!-- 引入FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>阅后即焚</h1>
+            <p>安全分享敏感信息，查看即销毁</p>
+        </header>
+        
+        <!-- 页面容器 - 将通过JS动态替换内容 -->
+        <div id="page-container"></div>
+    </div>
+
+    <!-- 页面模板 - 首页 -->
+    <template id="home-template">
+        <div class="prototype-section">
+            <div class="section-header">
+                <i class="fas fa-home"></i> 首页
+            </div>
+            <div class="section-content">
+                <div class="hero">
+                    <div class="hero-title">安全分享，阅后即焚</div>
+                    <div class="hero-subtitle">创建加密内容，设置访问次数和有效期，查看后自动销毁，保护您的敏感信息安全</div>
+                    <a href="#create" class="btn" id="create-btn">
+                        <i class="fas fa-plus"></i> 创建加密内容
+                    </a>
+                </div>
+                
+                <div class="features">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div class="feature-title">密码保护</div>
+                        <div class="feature-desc">为您的内容设置密码，确保只有知道密码的人才能查看</div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="feature-title">有效期限制</div>
+                        <div class="feature-desc">设置内容的有效期，过期后内容将自动销毁</div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-eye-slash"></i>
+                        </div>
+                        <div class="feature-title">查看次数限制</div>
+                        <div class="feature-desc">限制内容的最大查看次数，超过后内容将不可访问</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <!-- 页面模板 - 创建页面 -->
+    <template id="create-template">
+        <div class="prototype-section">
+            <div class="section-header">
+                <i class="fas fa-edit"></i> 创建加密内容
+            </div>
+            <div class="section-content">
+                <div class="create-form">
+                    <div class="form-group">
+                        <label class="form-label">内容</label>
+                        <textarea class="form-control content-textarea" id="content-input" placeholder="输入您要加密的内容..."></textarea>
+                    </div>
+                    
+                    <div class="options-row">
+                        <div class="option-col">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-lock"></i> 密码保护
+                                </label>
+                                <input type="password" class="form-control" id="password-input" placeholder="设置访问密码（可选）">
+                                <small style="color: var(--text-light);">留空则无需密码即可访问</small>
+                            </div>
+                        </div>
+                        
+                        <div class="option-col">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-clock"></i> 有效期
+                                </label>
+                                <select class="form-select" id="expiry-select">
+                                    <option value="1">1小时</option>
+                                    <option value="24" selected>1天</option>
+                                    <option value="168">7天</option>
+                                    <option value="720">30天</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="option-col">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-eye"></i> 查看次数
+                                </label>
+                                <select class="form-select" id="views-select">
+                                    <option value="1" selected>1次（查看后销毁）</option>
+                                    <option value="3">3次</option>
+                                    <option value="5">5次</option>
+                                    <option value="10">10次</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button class="btn" id="generate-btn">
+                            <i class="fas fa-paper-plane"></i> 生成加密链接
+                        </button>
+                        <a href="#" class="btn btn-outline ml-10">
+                            <i class="fas fa-arrow-left"></i> 返回
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <!-- 页面模板 - 创建成功页面 -->
+    <template id="success-template">
+        <div class="prototype-section">
+            <div class="section-header">
+                <i class="fas fa-check-circle"></i> 创建成功
+            </div>
+            <div class="section-content">
+                <div class="success-container">
+                    <div class="icon-box success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    
+                    <h2>加密内容创建成功!</h2>
+                    <p>您的内容已加密并生成了以下访问链接。请复制并安全地分享给需要查看的人。</p>
+                    
+                    <div class="form-group">
+                        <label class="form-label">访问链接</label>
+                        <div class="link-box" id="share-link">
+                            <span id="link-text"></span>
+                            <button class="copy-btn" title="复制链接" id="copy-btn">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">访问二维码</label>
+                        <div class="qr-code" id="qrcode-container">
+                            <!-- QR Code will be generated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-success">
+                        <i class="fas fa-info-circle"></i> 重要提示：<span id="expiry-info"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <a href="#create" class="btn">
+                            <i class="fas fa-plus"></i> 创建新内容
+                        </a>
+                        <a href="#" class="btn btn-outline ml-10">
+                            <i class="fas fa-home"></i> 返回首页
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <!-- 页面模板 - 密码验证 -->
+    <template id="password-template">
+        <div class="prototype-section">
+            <div class="section-header">
+                <i class="fas fa-key"></i> 内容访问 - 密码验证
+            </div>
+            <div class="section-content">
+                <div class="password-form">
+                    <div class="icon-box">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    
+                    <h2>此内容受密码保护</h2>
+                    <p>请输入密码以查看加密内容</p>
+                    
+                    <div class="form-group">
+                        <input type="password" class="form-control" id="access-password" placeholder="输入访问密码">
+                    </div>
+                    
+                    <div class="form-group">
+                        <button class="btn" id="verify-btn">
+                            <i class="fas fa-unlock"></i> 验证并查看
+                        </button>
+                    </div>
+                    
+                    <div class="security-info">
+                        <i class="fas fa-exclamation-circle"></i> 注意：<span id="security-notice"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <!-- 页面模板 - 内容展示 -->
+    <template id="content-template">
+        <div class="prototype-section">
+            <div class="section-header">
+                <i class="fas fa-file-alt"></i> 内容展示
+            </div>
+            <div class="section-content">
+                <div class="note-display">
+                    <h2>加密内容</h2>
+                    <div style="margin: 30px 0; line-height: 1.8;" id="content-display">
+                        <!-- 内容将在这里显示 -->
+                    </div>
+                    
+                    <div class="destruction-notice">
+                        <i class="fas fa-fire"></i> 警告：此内容已被查看，将在您关闭页面后永久销毁。
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button class="btn btn-danger" id="destroy-btn">
+                        <i class="fas fa-trash"></i> 立即销毁内容
+                    </button>
+                    <a href="#" class="btn btn-outline ml-10">
+                        <i class="fas fa-home"></i> 返回首页
+                    </a>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <!-- 页面模板 - 内容已过期 -->
+    <template id="expired-template">
+        <div class="prototype-section">
+            <div class="section-header">
+                <i class="fas fa-exclamation-triangle"></i> 错误 - 内容已过期
+            </div>
+            <div class="section-content">
+                <div class="error-container">
+                    <div class="icon-box danger">
+                        <i class="fas fa-calendar-times"></i>
+                    </div>
+                    
+                    <div class="error-title">内容已过期</div>
+                    <div class="error-message">
+                        您尝试访问的加密内容已经过期，无法再被查看。
+                        这可能是因为内容的有效期已过，或者内容创建者已经手动销毁了它。
+                    </div>
+                    
+                    <a href="#" class="btn">
+                        <i class="fas fa-home"></i> 返回首页
+                    </a>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <!-- 页面模板 - 内容已销毁 -->
+    <template id="destroyed-template">
+        <div class="prototype-section">
+            <div class="section-header">
+                <i class="fas fa-exclamation-triangle"></i> 错误 - 内容已被查看销毁
+            </div>
+            <div class="section-content">
+                <div class="error-container">
+                    <div class="icon-box danger">
+                        <i class="fas fa-eye-slash"></i>
+                    </div>
+                    
+                    <div class="error-title">内容已被查看销毁</div>
+                    <div class="error-message">
+                        您尝试访问的加密内容已经被查看过并销毁，无法再次查看。
+                        这是因为该内容的查看次数已达到上限。
+                    </div>
+                    
+                    <a href="#" class="btn">
+                        <i class="fas fa-home"></i> 返回首页
+                    </a>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- QR Code库 -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.0/build/qrcode.min.js"></script>
+    <script src="/scripts.js"></script>
+</body>
+</html> 
