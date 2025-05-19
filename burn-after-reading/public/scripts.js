@@ -78,19 +78,19 @@ function renderSuccessPage(data) {
     const linkText = document.getElementById('link-text');
     const expiryInfo = document.getElementById('expiry-info');
     const viewsCount = data.maxViews > 1 ? `${data.maxViews} 次` : '1 次';
-    const expiryHours = data.expiryHours;
+    const expirySeconds = data.expirySeconds;
     let expiryText = '';
     
-    if (expiryHours === 1) {
-        expiryText = '1小时';
-    } else if (expiryHours === 24) {
-        expiryText = '1天';
-    } else if (expiryHours === 168) {
-        expiryText = '7天';
-    } else if (expiryHours === 720) {
-        expiryText = '30天';
+    if (expirySeconds === 0) {
+        expiryText = '永不过期';
+    } else if (expirySeconds < 60) {
+        expiryText = `${expirySeconds} 秒`;
+    } else if (expirySeconds < 3600) {
+        expiryText = `${Math.floor(expirySeconds / 60)} 分钟`;
+    } else if (expirySeconds < 86400) {
+        expiryText = `${Math.floor(expirySeconds / 3600)} 小时`;
     } else {
-        expiryText = `${expiryHours}小时`;
+        expiryText = `${Math.floor(expirySeconds / 86400)} 天`;
     }
     
     const shareUrl = `${window.location.origin}/#view/${data.id}`;
@@ -100,7 +100,11 @@ function renderSuccessPage(data) {
     }
     
     if (expiryInfo) {
-        expiryInfo.textContent = `此链接将在内容被查看 ${viewsCount} 后或 ${expiryText} 后过期。`;
+        if (expirySeconds === 0) {
+            expiryInfo.textContent = `此链接将在内容被查看 ${viewsCount} 后过期。`;
+        } else {
+            expiryInfo.textContent = `此链接将在内容被查看 ${viewsCount} 后或 ${expiryText} 后过期。`;
+        }
     }
     
     // 生成二维码
@@ -243,8 +247,8 @@ async function handleCreateContent() {
     try {
         const contentInput = document.getElementById('content-input');
         const passwordInput = document.getElementById('password-input');
-        const expirySelect = document.getElementById('expiry-select');
-        const viewsSelect = document.getElementById('views-select');
+        const expiryInput = document.getElementById('expiry-input');
+        const viewsInput = document.getElementById('views-input');
         
         if (!contentInput || !contentInput.value.trim()) {
             alert('请输入要加密的内容！');
@@ -253,8 +257,26 @@ async function handleCreateContent() {
         
         const content = contentInput.value.trim();
         const password = passwordInput ? passwordInput.value : '';
-        const expiryHours = expirySelect ? parseInt(expirySelect.value) : 24;
-        const maxViews = viewsSelect ? parseInt(viewsSelect.value) : 1;
+        
+        // 获取有效期（秒）
+        let expirySeconds = 0;
+        if (expiryInput && expiryInput.value.trim()) {
+            expirySeconds = parseInt(expiryInput.value);
+            if (isNaN(expirySeconds) || expirySeconds < 0) {
+                alert('有效期必须是大于或等于0的数字');
+                return;
+            }
+        }
+        
+        // 获取查看次数
+        let maxViews = 1;
+        if (viewsInput && viewsInput.value.trim()) {
+            maxViews = parseInt(viewsInput.value);
+            if (isNaN(maxViews) || maxViews < 1) {
+                alert('查看次数必须是大于0的数字');
+                return;
+            }
+        }
         
         // 禁用按钮并显示加载状态
         const generateBtn = document.getElementById('generate-btn');
@@ -272,7 +294,7 @@ async function handleCreateContent() {
             body: JSON.stringify({
                 content,
                 password,
-                expiryHours,
+                expirySeconds,
                 maxViews
             })
         });

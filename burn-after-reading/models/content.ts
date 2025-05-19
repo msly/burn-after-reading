@@ -22,7 +22,7 @@ export interface CreateContentParams {
   content: string;
   password?: string;
   maxViews: number;
-  expiryHours: number;
+  expirySeconds: number;
   passwordHash?: string;
 }
 
@@ -30,10 +30,13 @@ export interface CreateContentParams {
  * 创建新内容
  */
 export function createContent(params: CreateContentParams): Content {
-  const { id, content, passwordHash = "", maxViews, expiryHours } = params;
+  const { id, content, passwordHash = "", maxViews, expirySeconds } = params;
   
   const now = new Date();
-  const expiresAt = new Date(now.getTime() + expiryHours * 60 * 60 * 1000);
+  // 如果expirySeconds为0，则设置一个很远的未来日期（实际上不会过期）
+  const expiresAt = expirySeconds > 0 
+    ? new Date(now.getTime() + expirySeconds * 1000) 
+    : new Date(now.getTime() + 1000 * 60 * 60 * 24 * 365 * 10); // 10年后，实际上不会过期
   
   return {
     id,

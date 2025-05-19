@@ -25,7 +25,7 @@ export class ContentService {
   async createContent(
     content: string,
     password: string,
-    expiryHours: number,
+    expirySeconds: number,
     maxViews: number
   ): Promise<Content> {
     const id = generateId();
@@ -35,8 +35,9 @@ export class ContentService {
       throw new Error("内容不能为空");
     }
     
-    if (expiryHours <= 0) {
-      throw new Error("有效期必须大于0小时");
+    // expirySeconds可以为0，表示不限制过期时间
+    if (expirySeconds < 0) {
+      throw new Error("有效期必须大于或等于0秒");
     }
     
     if (maxViews <= 0) {
@@ -52,7 +53,7 @@ export class ContentService {
       content,
       passwordHash,
       maxViews,
-      expiryHours
+      expirySeconds
     };
     
     const newContent = createContent(params);

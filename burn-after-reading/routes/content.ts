@@ -18,7 +18,7 @@ router.post("/api/content", async (ctx) => {
       return;
     }
     
-    const { content, password = "", expiryHours = 24, maxViews = 1 } = body;
+    const { content, password = "", expirySeconds = 0, maxViews = 1 } = body;
     
     if (!content || content.trim().length === 0) {
       ctx.response.status = Status.BadRequest;
@@ -30,7 +30,7 @@ router.post("/api/content", async (ctx) => {
     const newContent = await contentService.createContent(
       content,
       password,
-      Number(expiryHours),
+      Number(expirySeconds),
       Number(maxViews)
     );
     
@@ -39,7 +39,7 @@ router.post("/api/content", async (ctx) => {
     ctx.response.body = {
       id: newContent.id,
       maxViews: newContent.maxViews,
-      expiryHours: expiryHours
+      expirySeconds: expirySeconds
     };
     
   } catch (error) {
